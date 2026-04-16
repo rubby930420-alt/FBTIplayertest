@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>你的球场人格</title>
+
+<style>
+body {
+    margin: 0;
+    background: #eef3f3;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 卡片整体 */
+.card {
+    width: 900px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 40px 50px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+/* 右上角类型 */
+/* 顶部居中 */
+.type-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* 小标题 */
+.type-label {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* 大标题（模仿你图里的感觉） */
+.type-main {
+    font-size: 42px;
+    font-weight: 700;
+    color: #4a5a4a; /* 偏墨绿 */
+    letter-spacing: 2px;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-weight: 800;
+}
+/* 主体布局 */
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 左边文字 */
+.left {
+    flex: 1;
+    padding-right: 40px;
+}
+
+/* 主标题（那句大话） */
+.quote {
+    font-size: 26px;
+    font-weight: 600;
+    color: #2c4f4f;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+.quote span {
+    color: #2c7a7b;
+}
+/* 描述 */
+.desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.8;
+}
+
+/* 右边图片 */
+.right {
+    width: 260px;
+    text-align: center;
+}
+
+.right img {
+    width: 100%;
+    max-width: 240px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- 右上：类型名称 -->
+    <div class="type-box">
+    <div class="type-label">原来你在球场上是：</div>
+    <div class="type-main" id="title">核爆超人</div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="content">
+
+        <!-- 左边：文字 -->
+        <div class="left">
+            <div class="quote" id="quote">
+                你就是场上的终结机器
+            </div>
+
+            <div class="desc" id="desc">
+                描述内容
+            </div>
+        </div>
+
+        <!-- 右边：图片 -->
+        <div class="right">
+            <img id="image" src="" />
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+// 读取结果
+
+
+const resultMap = {
+
+    "IAEP_strong": {
+        title: "核爆超人",
+        img: "images/IAEP_strong.png",
+        quote: "极致的胜负欲化身，场上唯一的真神",
+        desc: "作为球队最稳定的终结点，机会一旦出现就不会浪费。拥有无与伦比的胜负欲与领袖气质。无论陷入何种绝境，始终相信个人能力可以扭转乾坤，是球队最坚定的战术终结者与精神图腾。",
+    },    
+    
+    
+    "IAEP_weak": {
+        title: "禁区黛玉",
+        img: "images/IAEP_weak.png",
+        quote: "博弈论足球的践行者，感官的敏锐使你深谙竞技规则",
+        desc: "拥有出色的身体协调性与极其灵敏的嗅觉，擅长利用规则保护自己并为球队换取机会和在紧凑空间内利用节奏变化制造杀。偶尔示弱但是实则刚柔并济，能够成为球场上极具灵气的战术破局点。",
+
+    },
+
+    
+    "IAET_strong": {
+        title: "黑熊警长",
+        img: "images/IAET_strong.png",
+        quote: "在场上的对抗不仅是身体的较量，更是精神的博弈",
+        desc: "是赛场上极具正义感与意志力的冲锋者。不仅在竞技层面拥有撕裂防线的爆发力，在精神层面更是敢于直面争议、挑战秩序的勇士，主张通过高频的情绪表达与强悍的心理博弈来掌控局面。是球队最锋利的矛。"
+
+    },
+
+    "IAET_weak": {
+        title: "伤仲永",
+        img: "images/IAET_weak.png",
+        quote: "足球是艺术的延伸，唯有释放天性，方能创造令人屏息的瞬间",
+        desc: "纯粹的天赋型球员，拥有极具观赏性的个人技术。不愿被僵化的体系束缚，虽然偶尔会因为身体对抗而陷入困境，但当状态火热时，能够创造出令人惊叹的精彩瞬间，是球队中最具观赏性的存在。"
+
+    },
+
+    "IAGT_strong": {
+        title: "金牌会计",
+        img: "images/IAGT_strong.png",
+        quote: "最迷人的不是感性的狂奔，而是理性的增值；每一次触球都应是一次深思熟虑的投资",
+        desc: "拒绝盲目的体力消耗，而是精准地出现在收益最高的区域。他将进球、助攻与关键传球视作资产配置，希望用最精确的触球换取最客观的数据产出。是球场上的理性实用主义者，是追求胜利的精算师。",
+
+    },
+
+    "IAGT_weak": {
+        title: "快乐圆神",
+        img: "images/IAGT_weak.png",
+        quote: "钟情于制造防守者眼中的迷茫和全场球迷的惊叹，进攻实在描绘最美的画卷",
+        desc: "是球场上的视觉焦点，并不急于寻求最简单的路径，而是通过富有仪式感的虚晃和空间拉扯，运用极具辨识度的个人技巧和独特的控球节奏来吸引防守注意力。虽偶有失误，但球场江湖，一笑而过。",
+
+    },
+
+    "IAGP_strong": {
+        title: "单刀神人",
+        img: "images/IAGP_strong.png",
+        quote: "逻辑无法定义足球，直觉方能指引梦想",
+        desc: "是球场上最难以预测的变量。拥有惊人的身体天赋与瞬间爆发力，擅长在毫无征兆的情况下利用本能撕裂最严密的防线。并不迷信常规的战术逻辑，是用纯粹的热情与直觉冲击防线固有秩序的开拓者。",
+
+    },
+
+    "IAGP_weak": {
+        title: "楚庄王",
+        img: "images/IAGP_weak.png",
+        quote: "空间的本质就是对抗，站立的地方即是进攻的终点",
+        desc: "拥有罕见的身体规格与力量对抗能力。不仅是门前的重型支点，更能通过强大的背身护球能力为球队筑起掩体。虽然偶尔会因体积巨大挡住线路，但在禁区内的战略威慑力是任何对手都无法忽视的。",
+
+    },
+
+    "ICET_weak": {
+        title: "眼神防守专家",
+        img: "images/ICET_weak.png",
+        quote: "视野的宽度决定了反击的深度，突破防守境界方能让对手错乱节奏",
+        desc: "拥有顶级的传球视野与空间调度能力，更倾向于利用战术站位和眼神预判来延缓对方攻势，而非盲目地陷入肌肉博弈，重新定义了后场球员的职能，是球场上精确制导的长程指挥官。",
+
+    },
+
+    "ICET_strong": {
+        title: "替补席教练",
+        img: "images/ICET_strong.png",
+        quote: "视野不应局限于我的位置，战术理论早已深谙于心",
+        desc: "拥有极强的领袖意识和管理直觉，不仅关注自己的职责，更时刻审视全队的阵型优劣。他在关键时刻敢于挺身而出接管指挥权，即便角色受限身在场下，也能通过言语沟通与战术建议影响战局。",
+
+    },
+
+    "ICGT_strong": {
+        title: "全职保姆",
+        img: "images/ICGT_strong.png",
+        quote: "平凡的跑位背后是伟大的补缺，体能覆盖无死角",
+        desc: "不知疲倦的横向拦截与纵向奔波，默默地为进攻核心解决后顾之忧和提供援助支点。具有惊人的体能储备与极致的战斗精神，是球队运行的润滑剂，也是所有战术体系中最值得信赖的底层基石。",
+
+    },
+
+    "ICGT_weak": {
+        title: "收着踢大师",
+        img: "images/ICGT_weak.png",
+        quote: "恰到好处的节奏掌控感才是全场最迷人的风景",
+        desc: "擅长在看似平缓的基调下寻找防线的裂痕，用最节省体力的方式完成最致命的调度或终结。不疾不徐，在云淡风轻间让对手陷入你布置的逻辑陷阱，是球队最稳健的战术定盘星。",
+
+    },
+
+    "ICEP_strong": {
+        title: "定时炸弹",
+        img: "images/ICEP_strong.png",
+        quote: "在规则边缘的极致冒险，才能打破势均力敌的僵局",
+        desc: "是球场上最不可预测的能量源，也是战术体系中的“双刃剑”。拥有超越常人的身体素质和斗士精神，习惯于用极高风险的动作去博取极高收益的防守或进攻。拒绝安稳，始终追求在毫厘之间完成极限封堵或突破",
+
+    },
+
+    "ICEP_weak": {
+        title: "后场整活王",
+        img: "images/ICEP_weak.png",
+        quote: "如果拘泥于传统的位置要求，那足球将失去一半的灵魂",
+        desc: "极度自信且热衷于在危险地带展示你的控球技术与摆脱能力，主张通过极具风险的个人表演来撕裂对方的高位逼抢，这种大胆常让教练和队友心跳加速，但那种打破常规的尝试，往往是球队撕开僵局的意外之匙",
+
+    },
+
+    "ICGP_strong": {
+        title: "闷声漏勺",
+        img: "images/ICGP_strong.png",
+        quote: "静默者往往也是影响战局的关键者",
+        desc: "在体系中维持一种平衡的假象用于麻醉对手，遵奉顺其自然的竞技哲学，偶然的失误并不能掩盖你在场上的重要作用。虽然不以高调的表现为己任，但在关键时刻总能以出人意料的方式成为球队的定海神针。",
+
+    },
+    "ICGP_weak": {
+        title: "球场尤物",
+        img: "images/ICGP_weak.png",
+        quote: "有一万种方式能在场上证明你的存在",
+        desc: "是天生的球场主角，拥有极强的自我表现欲和心理素质。不仅仅满足于完成本职工作，更热衷于在极高压的情况下展示自己的优雅与淡定，喜欢冒险是为了接管比赛，勇气与魅力并存才是取胜王道。",
+
+    },
+
+    "SAET_strong": {
+        title: "摊手艺术家",
+        img: "images/SAET_strong.png",
+        quote: "胜利源于对每一个细节的严苛要求，不甘平庸充满想象力",
+        desc: "对团队配合与战术执行力有着极高的标准。他拥有卓越的视野和创造力，始终致力于推动球队追求更高效的进攻。当场面偏离理想轨迹时，主动提振队友，是场上不可忽视的情绪引擎与节拍掌控者",
+
+    },
+
+    "SAET_weak": {
+        title: "场上总监",
+        img: "images/SAET_weak.png",
+        quote: "主导全局，真正的权力源于无可替代的影响力",
+        desc: "兼具极致的个人能力与宏观的战术直觉。不仅是进攻的终结点，更是整个战术体系的发动机。主张球员应拥有对比赛进程的主导权，以超凡的爆发力改变球场格局，是全队最坚实且最高效的进攻底牌。",
+
+    },
+
+    "SAEP_strong": {
+        title: "吃饼狂魔",
+        img: "images/SAEP_strong.png",
+        quote: "进球是唯一的度量衡，效率是唯一的判断标准",
+        desc: "拥有顶级的跑位嗅觉与禁区统治力。主张极简主义和暴力美学，拒绝一切多余的无效跑动与横向带球，时刻保持着对门线最敏锐的杀机。是战术链条的终端，是全队努力最终变现的精密仪器",
+
+    },
+
+    "SAEP_weak": {
+        title: "补刀仙人",
+        img: "images/SAEP_weak.png",
+        quote: "更早洞察到那零点一秒的空白，才是球场上最致命的威胁",
+        desc: "是冷峻而高效的残局收割者，拥有极高维度的比赛阅读能力。并不执着于华丽的控球，而是凭借超凡的直觉游走在对手防线的盲区。善于用智力击碎对抗，在局势混沌时刻，完成朴实无华却极其精准的补刀。",
+
+    },
+
+    "SAGT_strong": {
+        title: "漫步宗师",
+        img: "images/SAGT_strong.png",
+        quote: "真正的控制力来自于对节奏的把握，而非单纯的身体统治",
+        desc: "拥有上帝般顶级的比赛阅读能力，通过静态观察精准捕捉防线漏洞。技巧灵活但不失决定胜负的强者风范，在关键时刻以瞬间的爆发和决策终结比赛。是战术意义上的“静默核武”，既可以游离于乱局之外，又能一锤定音",
+
+    },
+
+    "SAGT_weak": {
+        title: "妳滴寒王 ",
+        img: "images/SAGT_weak.png",
+        quote: "极寒的冷静下隐藏最炽热的斗志",
+        desc: "始终能保持一种超然的冷静，仿佛置身于真空环境。拥有极高的决策质量和出色的空间感知，擅长用看似松弛的步频处理极高难度的传射。主张用智力与技术实现对局势的降维打击，同时时刻规划串联全队的战术解法。",
+
+    },
+
+    "SAGP_strong": {
+        title: "前场佳丽",
+        img: "images/SAGP_strong.png",
+        quote: "每一帧的优雅都在宣告对绿茵场的主宰",
+        desc: "兼具美感与现代效率的进攻猛兽。俊朗的外表之下是极其硬朗的竞技风格，既能在禁区内以强悍的身体对抗完成终结，也能在边路以优雅的盘带撕开防线。是球队最具观赏性的攻击点，也是全场最靓的仔。",
+
+    },
+
+    "SAGP_weak": {
+        title: "宝藏男孩",
+        img: "images/SAGP_weak.png",
+        quote: "进球是本职，但能者往往多劳",
+        desc: "主张极其成熟的博弈策略，既能化身破冰船在中路强行开路，也擅长回撤至深处通过跨越半场的长传策动进攻。是进攻端的战术万金油，兼具“极致射手”与“中场大脑”完美融合的人格，是整套战术体系的核心枢纽。",
+
+    },
+
+    "SCEP_strong": {
+        title: "万吨航母",
+        img: "images/SCEP_strong.png",
+        quote: "以身躯为盾，构建不可逾越的屏障",
+        desc: "身体素质雄厚，擅长在中路利用对抗优势封堵空间。主张静态防守的稳定性，是球队在应对高空球和禁区缠斗时的核心支点。最具分量和物理杀伤力的战略资产，一旦在禁区落位，就像一座不可撼动的钢铁堡垒",
+    
+    },
+
+    "SCET_weak": {
+        title: "火枪指挥",
+        img: "images/SCET_weak.png",
+        quote: "在技术和对抗上争取双赢，这才是刺激的足球",
+        desc: "拥有顶级中后场的思维，却配了一颗极易过热的心。是球队的节拍器，处理球冷静、优雅且极具团队意识，偶尔会成为不稳定的火药桶，这种双面性一定程度上反而成为指点江山操控局势的独特魅力。",
+
+    },
+
+    "SCET_strong": {
+        title: "红宝石战神",
+        img: "images/SCET_strong.png",
+        quote: "为了最后的胜利在规则边缘燃尽所有",
+        desc: "不仅有防守端的暴力美学，更拥有一颗永不熄灭的前锋之心。主张用极高的心理压迫感来摧毁对手的斗志，通过肢体接触和精神博弈掌控局面拥有顶级的防守硬度与求胜欲。是球队在逆境中赖以生存的精神硬核。",
+    
+    },
+
+    "SCEP_weak": {
+        title: "拦网暴君",
+        img: "images/SCEP_weak.png",
+        quote: "身体站在这里，便已形成秩序",
+        desc: "拥有顶级的人体工学防守逻辑和掌控全局的松弛感，主张通过极佳的身体条件和教科书般的选位，在对方进攻发起前就将其消弭于无形。后防线上的指挥官，固若金汤，能通过言语和手势将整条防线调教得如同一台精密仪器",
+
+    },
+
+    "SCGP_strong": {
+        title: "空间观测家",
+        img: "images/SCGP_strong.png",
+        quote: "防守的艺术在于看穿足球空间的几何学",
+        desc: "阅读比赛的能力不输于前场核心，以极高的纪律性和团队协作能力构建起一道坚不可摧的防线。主张通过严密的站位和默契的配合来抵御对手的进攻威胁，是球队在防守端最可靠的屏障，也是攻守转换中最稳健的基石。",
+    
+    },
+
+    "SCGP_weak": {
+        title: "原地防守员",
+        img: "images/SCGP_weak.png",
+        quote: "足球也可以踢得低碳环保",
+        desc: "以不变应万变，泰山崩于前而面不改色。深信防守的最高境界是“威慑”，通过双目圆睁的注视和偶尔指挥队友跑位的指挥手势，在精神层面构建起一道无形的防火墙，是球场上最稳定的参照物，执行战术最忠实的践行者。",
+
+    },
+
+    "SCGT_strong": {
+        title: "绿茵交际花",
+        img: "images/SCGT_strong.png",
+        quote: "华丽而不失礼貌，飘逸中透露锋芒",
+        desc: "场下是人脉管理大师，场上是梳理攻防的大脑。主张一种思想高度与竞技并重的哲学，擅长在不同战术体系间寻找平衡点，既能在防守端以优雅的方式化解危机，也能在进攻端以精妙的传球撕开对方防线。",
+    },
+
+    "SCGT_weak": {
+        title: "安全球大师",
+        img: "images/SCGT_weak.png",
+        quote: "稳健，才有稳定的输出；安全，造就安逸的胜利",
+        desc: "保持着专注力，恪守极高的纪律性是，球场上最敏锐的风向探测器。对比赛环境的安全性有着近乎苛刻的要求，拒绝在泥泞中肉搏，只愿在阳光下跳舞，选择适时开启大师模式。",
+    },
+    "X_default": {
+        title: "天生X因素",
+        img: "images/default.png",
+        quote: "一个独特的存在，难以定义的球场魔方",
+        desc: "目前的测试不能定义该类型，但这并不意味其没有独特的球场魅力。相反，该类型深谙战术的阴阳平衡之道和技术的五行相克之术，在恍惚之间破敌于无形，在混沌之中挽大厦之将倾！",
+    },
+
+};
+
+
+// 获取数据
+const result = JSON.parse(localStorage.getItem("result"));
+
+console.log("result:", result);
+
+if (!result) {
+    document.body.innerHTML = "请先完成测试";
+    throw new Error("没有 result");
+}
+
+const key = result.type + "_" + result.level;
+
+console.log("key:", key);
+
+const data = resultMap[key];
+
+console.log("data:", data);
+
+if (!data) {
+    data = findClosestType(result.score);
+}
+
+if (!data) {
+    data = resultMap["X_default"];
+}
+document.getElementById("title").innerText = data.title;
+document.getElementById("image").src = data.img;
+document.getElementById("quote").innerText = data.quote;
+document.getElementById("desc").innerText = data.desc;
+
+</script>
+
+</body>
+</html>

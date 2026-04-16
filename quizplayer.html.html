@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>FBTI测试</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    background: linear-gradient(135deg, #E0ECDE, #CDE0C9);
+    padding: 20px;
+}
+
+/* 卡片 */
+.container {
+    max-width: 650px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(44, 105, 117, 0.15);
+}
+
+/* 进度 */
+#progress {
+    margin-bottom: 15px;
+    color: #2C6975;
+    font-weight: bold;
+}
+
+/* 题目 */
+#question {
+    color: #2C6975;
+    margin-bottom: 20px;
+}
+
+/* 选项卡 */
+.option {
+    padding: 14px 18px;
+    margin: 12px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #F7FAF8;
+    border: 1px solid #CDE0C9;
+    color: #2C6975;
+}
+
+/* 悬停 */
+.option:hover {
+    background: #E0ECDE;
+    transform: translateY(-2px);
+}
+
+/* 选中（重点🔥） */
+.option.selected {
+    background: linear-gradient(135deg, #2C6975, #68B2A0);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 15px rgba(44, 105, 117, 0.3);
+}
+
+/* 按钮 */
+button {
+    margin-top: 25px;
+    padding: 12px 26px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+
+    background: linear-gradient(135deg, #2C6975, #68B2A0);
+    color: white;
+
+    transition: all 0.25s ease;
+}
+
+/* 按钮悬停 */
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(44, 105, 117, 0.3);
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <div id="progress"></div>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+
+    <button id="nextBtn">下一题</button>
+
+</div>
+<div id="loading" style="display:none; text-align:center;">
+    <img src="loading.gif" width="150">
+    <p>正在分析你的球场人格...</p>
+</div>
+
+<script>
+    const questions = [
+    {
+        id: 1,
+        text: "我在现实生活中是：",
+        options: [
+            {
+                text: "自来熟超级外向",
+                scores: { Individual: 1, Emotional: 0.5 }
+            },
+            {
+                text: "比较外向",
+                scores: { Individual: 1, Gentle: 0.5 }
+            },
+            {
+                text: "分情况，看场合",
+                scores: { Systematic: 1, Gentle: 0.5 }
+            },
+            {
+                text: "比较内向",
+                scores: { Systematic: 0.5, Gentle: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 2,
+        text: "球场上我是一个有想象力和创造力的人",
+        options: [
+            {
+                text: "认可",
+                scores: { Systematic: 0.5, Tech: 1 }
+            },
+            {
+                text: "分情况",
+                scores: { Systematic: 1, Gentle: 0.5 }
+            },
+            {
+                text: "不认可",
+                scores: { Individual: 0.5, Conservative: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 3,
+        text: "生活中我有不错的团队领导能力",
+        options: [
+            {
+                text: "认可",
+                scores: { Systematic: 1, Gentle: 0.5 }
+            },
+            {
+                text: "分情况",
+                scores: { Systematic: 0.5, Gentle: 1 }
+            },
+            {
+                text: "不认可",
+                scores: { Individual: 1, Conservative: 0.5 }
+            }
+        ]
+    },
+
+    {
+        id: 4,
+        text: "个人理念中，进攻和防守只能取其一时",
+        options: [
+            {
+                text: "攻就完了",
+                scores: { Aggressive: 1 }
+            },
+            {
+                text: "大翔守住",
+                scores: { Conservative: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 5,
+        text: "我踢球爱上身体对抗",
+        options: [
+            {
+                text: "完全正确",
+                scores: { Emotional: 0.5, Power: 1 }
+            },
+            {
+                text: "偶尔会",
+                scores: { Gentle: 0.5, Power: 0.5 }
+            },
+            {
+                text: "避其锋芒",
+                scores: { Tech: 1, Conservative: 0.5 }
+            }
+        ]
+    },
+
+    {
+        id: 6,
+        text: "踢球要骚",
+        options: [
+            {
+                text: "骚爆好吧",
+                scores: { Emotional: 0.5, Tech: 1 }
+            },
+            {
+                text: "一点就行",
+                scores: { Systematic: 1, Tech: 0.5 }
+            },
+            {
+                text: "不认同",
+                scores: { Gentle: 0.5, Conservative: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 7,
+        text: "我踢球技术超级好的",
+        options: [
+            {
+                text: "我就是野球内马尔",
+                scores: { Tech: 1, Aggressive: 0.5 }
+            },
+            {
+                text: "马马虎虎",
+                scores: { Gentle: 0.5, Tech: 0.5 }
+            },
+            {
+                text: "不太会踢",
+                scores: { Gentle: 0.5, Conservative: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 8,
+        text: "踢野球时候的我：",
+        options: [
+            {
+                text: "全力进攻",
+                scores: { Emotional: 0.5, Aggressive: 1 }
+            },
+            {
+                text: "好好防守",
+                scores: { Gentle: 0.5 }
+            },
+            {
+                text: "满场奔波",
+                scores: { Systematic: 1, Conservative: 0.5 }
+            },
+            {
+                text: "观察情况再决定",
+                scores: { Individual: 1, Conservative: 0.5 }
+            }
+        ]
+    },
+
+    {
+        id: 9,
+        text: "在更加正规的比赛中，你更偏好什么职责",
+        options: [
+            {
+                text: "进攻",
+                scores: { Aggressive: 1 }
+            },
+            {
+                text: "中场策应",
+                scores: { Systematic: 0.5, Tech: 0.5 }
+            },
+            {
+                text: "防守",
+                scores: { Conservative: 1 }
+            }
+        ]
+    },
+
+    {
+        id: 10,
+        text: "你能顶住压力，成为点球第一主罚手",
+        options: [
+            {
+                text: "没错，就是这样",
+                scores: { Emotional: 0.5, Tech: 0.5, Aggressive: 1 }
+            },
+            {
+                text: "说不好但乐意踢",
+                scores: { Gentle: 0.5, Aggressive: 0.5 }
+            },
+            {
+                text: "还是不要的好",
+                scores: { Conservative: 0.5 }
+            }
+        ]
+    },
+    {  
+        
+         id: 11,
+        text: "踢球是一种极好的发泄方式",
+        options: [
+            { text: "是的", scores: { Emotional: 0.5, Aggressive: 1 } },
+            { text: "也许", scores: { Gentle: 1, Aggressive: 0.5 } },
+            { text: "不是吧", scores: { Gentle: 0.5, Conservative: 1 } }
+        ]
+    },
+
+    {
+        id: 12,
+        text: "你的头球水平是",
+        options: [
+            { text: "绝对的制空机器", scores: { Power: 1, Aggressive: 0.5 } },
+            { text: "抢一抢没问题", scores: { Power: 0.5, Aggressive: 0.5 } },
+            { text: "其实我是地面流", scores: { Tech: 0.5, Conservative: 1 } }
+        ]
+    },
+
+    {
+        id: 13,
+        text: "下列点球方式喜欢的方式是",
+        options: [
+            { text: "大力轰上角", scores: { Power: 1, Aggressive: 0.5 } },
+            { text: "低射下角死角", scores: { Gentle: 0.5, Aggressive: 0.5 } },
+            { text: "节奏步骗门将", scores: { Emotional: 0.5, Conservative: 0.5 } },
+            { text: "勺子点球", scores: { Tech: 1, Conservative: 0.5 } }
+       ]
+    },
+
+    {
+        id: 14,
+        text: "我会是那种赢球心理极强的球员",
+        options: [
+            { text: "是的", scores: { Individual: 0.5, Aggressive: 1 } },
+            { text: "也许", scores: { Gentle: 0.5, Aggressive: 0.5 } },
+            { text: "不是吧", scores: { Systematic: 0.5, Conservative: 1 } }
+        ]    
+    },
+
+    {
+        id: 15,
+        text: "比赛前分析对手战术并用失败激励自己，你会：",
+        options: [
+            { text: "答应，并且我也会这么做", scores: { Individual: 0.5, Aggressive: 1 } },
+            { text: "不认可但还是去", scores: { Systematic: 1, Conservative: 0.5 } },
+            { text: "拒绝，没必要", scores: { Individual: 1, Systematic: 0.5, Conservative: 1 } }
+        ]
+    },
+
+    {
+        id: 16,
+        text: "我希望掌握极大的更衣室话语权",
+        options: [
+            { text: "没错，就是这样", scores: { Individual: 1, Aggressive: 0.5 } },
+            { text: "还是不要的好", scores: { Systematic: 1, Conservative: 0.5 } }
+        ]
+    },
+
+    {
+        id: 17,
+        text: "球队占尽优势但是闷平弱旅，面对媒体对你能力的质疑，作为队长你会怎么回答：",
+        options: [
+            { text: "强调数据优势，表示时运不济", scores: { Individual: 0.5, Conservative: 1 } },
+            { text: "微笑回应稳定军心", scores: { Systematic: 0.5, Gentle: 1 } },
+            { text: "表达不满，表示会尽力掌控", scores: { Systematic: 0.5, Emotional: 1 } },
+            { text: "回击媒体，认为他们是在夸大问题", scores: { Individual: 0.5, Aggressive: 1 } }
+        ]
+    },
+
+    {
+        id: 18,
+        text: "训练课上你认为教练布置无用于第二天的比赛，你会：",
+        options: [
+            { text: "当面指出", scores: { Individual: 1, Emotional: 0.5 } },
+            { text: "私下和队友议论，自行调整", scores: { Systematic: 0.5, Gentle: 0.5, Emotional: 0.5 } },
+            { text: "私下与教练沟通", scores: { Systematic: 0.5, Emotional: 1, Conservative: 0.5 } },
+            { text: "这是教练组的安排，照做就行", scores: { Individual: 0.5, Conservative: 1 } }
+        ]
+    },
+
+    {
+        id: 19,
+        text: "最新转会完成，你来到一家新的俱乐部，但是这家俱乐部实力较弱，你的第一想法是：",
+        options: [
+            { text: "A. 我要把天赋带到这里", scores: { Individual: 1, Aggressive: 0.5 } },
+            { text: "B. 努力训练，踢好比赛", scores: { Systematic: 1, Gentle: 0.5 } },
+            { text: "C. 我需要一段时间适应，实在不行我就溜了", scores: { Systematic: 0.5, Emotional: 1 } },
+            { text: "D. 按合同拿钱就行了", scores: { Individual: 0.5, Conservative: 0.5 } }
+        ]
+    },
+
+    {
+        id: 20,
+        text: "更衣室风波后，球队决定撤换队长你会：",
+        options: [
+            { text: "找管理层了解情况", scores: { Systematic: 1, Aggressive: 0.5 } },
+            { text: "和队友私下讨论", scores: { Systematic: 0.5, Gentle: 1 } },
+            { text: "直接竞选队长！！！", scores: { Individual: 1, Emotional: 0.5 } },
+            { text: "不关我事", scores: { Individual: 0.5, Conservative: 0.5 } }
+        ]
+    },
+       
+
+    {
+        id: 21,
+        text: "球队宣布会引进一个你同位置的球员与你竞争，据说他的实力比你强，你最可能的状态是",
+        options: [
+            { text: "A. 感到不公并萌生去意", scores: { Individual: 1, Emotional: 0.5 } },
+            { text: "B. 小有苦恼但是新生更多动力", scores: { Gentle: 0.5, Aggressive: 0.5 } },
+            { text: "C. 淡然接受 希望躺平", scores: { Systematic: 1, Conservative: 0.5 } }
+        ]
+    },
+
+    {
+        id: 22,
+        text: "裁判检查装备，发现你的球袜拉得不够高或护腿板不合规，你的第一反应是？",
+        options: [
+            { text: "A. 摇摇头想：你是真的细", scores: { Emotional: 1, Aggressive: 0.5 } },
+            { text: "B. 一边尴尬一边整理", scores: { Gentle: 0.5, Conservative: 1 } },
+            { text: "C. 不说话，先走到一边再说", scores: { Gentle: 1, Conservative: 0.5 } },
+            { text: "D. 和裁判讲点什么开脱或者转移注意力", scores: { Aggressive: 0.5 } }
+        ]
+    },
+
+    {
+        id: 23,
+        text: "赛前在球员通道准备的时候，你",
+        options: [
+            { text: "A. 争分夺秒与队友讨论战术", scores: { Systematic: 1, Emotional: 0.5 } },
+            { text: "B. 整理一下自己的形象准备出场", scores: { Individual: 1, Emotional: 0.5 } },
+            { text: "C. 与球童亲切互动，放松一下", scores: { Systematic: 0.5, Gentle: 1 } },
+            { text: "D. 冷静情绪，暗记战术安排", scores: { Individual: 0.5, Conservative: 0.5 } }
+        ]
+    },
+
+    {
+        id: 24,
+        text: "球队获得角球，你进入对方禁区，你的第一想法是？",
+        options: [
+            { text: "A. 冲进去争取进他一个", scores: { Aggressive: 0.5 } },
+            { text: "B. 找好位置争顶", scores: { Power: 1 } },
+            { text: "C. 给队友掩护制造空间", scores: { Systematic: 0.5, Gentle: 0.5 } },
+            { text: "D. 随便争，主要防止对方反击", scores: { Conservative: 1 } }
+        ]
+    },
+
+    {
+        id: 25,
+        text: "作为前锋，长时间没进过球了，球队领先，此时获得一粒点球，第一点球手并不在场上，你会：",
+        options: [
+            { text: "A. 还是不罚的好", scores: { Systematic: 0.5 } },
+            { text: "B. 与队友讨论，索要机会", scores: { Individual: 0.5, Gentle: 0.5 } },
+            { text: "C. 抱球走向点球点", scores: { Individual: 1, Aggressive: 0.5 } }
+        ]
+    },
+
+    {
+        id: 26,
+        text: "你的主教练在场边准备要换你下场，而你体力尚在并不想下场，你会？",
+        options: [
+            { text: "A. 像没看见换人牌一样，拖延一下，直到他开始喊了。", scores: { Individual: 0.5, Aggressive: 0.5 } },
+            { text: "B. 骂骂咧咧地走下去，沿途踢翻两个水瓶并无视教练。", scores: { Individual: 0.5, Emotional: 1 } },
+            { text: "C. 闷闷不乐，感觉自己受到了不公的对待。", scores: { Emotional: 0.5, Conservative: 0.5 } },
+            { text: "D. 直接走下去，然后在替补席和队友抱怨。", scores: { Systematic: 0.5, Emotional: 0.5 } }
+        ]
+    },
+
+    {
+        id: 27,
+        text: "27.某天你看到新闻，说某评论员言辞激烈地批评你的技战术水平，你会：",
+        options: [
+            { "text": "A. 社媒回怼：你行你上", "scores": { "Emotional": 1, "Aggressive": 0.5 } },
+            { "text": "B. 置若罔闻，无所谓", "scores": { "Gentle": 0.5, "Conservative": 0.5} },
+            { "text": "C. 自我怀疑 反思", "scores": { "Systematic": 0.5, "Conservative": 0.5} },
+            { "text": "D. 下次有机会阴阳他一下", "scores": { "Individual": 1, "Emotional": 0.5, } }
+        ]
+    },
+
+    {
+        "id": 28,
+        "text": "28.比赛中对手多次对你施加小动作且出言不逊，你会",
+        "options": [
+            { "text": "A. 找个二分之一球的机会跟他上大对抗", "scores": { "Power": 1, "Aggressive": 1 } },
+            { "text": "B. 继续挑衅，言语激怒他", "scores": { "Emotional": 0.5, "Aggressive": 1 } },
+            { "text": "C. 花式过人羞辱他", "scores": {"Tech": 0.5, "Aggressive": 0.5 } },
+            { "text": "D. 当作无事发生，专心比赛", "scores": { "Gentle": 0.5, "Conservative": 0.5 } }
+        ]
+    },
+
+    {
+        id: 29,
+        text: "29.你传给队友一记单刀但他莫名奇妙打飞了，你的第一反应更可能会是",
+        options: [
+            { "text": "A. 无奈摇头并转身回位", "scores": { "Emotional": 0.5, "Conservative": 0.5 } },
+            { "text": "B. 直接抱怨几句", "scores": { "Emotional": 1, "Individual": 0.5} },
+            { "text": "C. 鼓掌激励", "scores": { "Systematic": 0.5, "Gentle": 1 } },
+            { "text": "D. 不做反应", "scores": {"Gentle": 0.5, "Conservative": 0.5} }
+        ]
+    },
+
+    {
+        "id": 30,
+        "text": "30. 你的队友在禁区前沿被暴力放铲痛苦倒地，球权回到了你脚下，有一定的空间，你首先会",
+        "options": [
+            { "text": "A. 机不可失，继续组织进攻", "scores": { "Individual": 1, "Emotional": 1, "Aggressive": 0.5 } },
+            { "text": "B. 停下球，向裁判理论施压", "scores": { "Emotional": 0.5, "Conservative": 0.5 } },
+            { "text": "C. 直接找犯规的人质问理论", "scores": { "Emotional": 1,"Aggressive": 0.5 } },
+            { "text": "D. 踢出球后，察看队友情况", "scores": { "Systematic": 0.5, "Gentle": 0.5 } }
+        ]
+    },
+
+    {
+        "id": 31,
+        "text": "31.转换阶段你在中场边路拿球，对方两名防守队员由中场迅速合围过来，此时你的选择是",
+        "options": [
+            { "text": "A. 暴力提速尝试边路超车", "scores": { "Individual": 0.5, "Aggressive": 1 } },
+            { "text": "B. 技术致胜 秀秀花活", "scores": { "Individual": 1, "Emotional": 0.5, "Aggressive": 0.5 } },
+            { "text": "C. 稳妥回传，绝不承担任何丢球风险", "scores": { "Systematic": 0.5, "Conservative": 1 } },
+            { "text": "D. 暂缓节奏看看是否能造成界外球乃至犯规", "scores": { "Systematic": 0.5, "Gentle": 0.5, "Conservative": 0.5 } }
+        ]
+    },
+
+    {
+        "id": 32,
+        "text":"32.完成一粒进球后，你打破了一个很长的进球荒，你会",
+        "options":[
+            {"text": "A. 按照预想的动作疯狂庆祝","scores":{"Individual":1, "Emotional":0.5 }},
+            {"text": "B. 等待队友一同庆祝","scores":{"Systematic":1,"Gentle":0.5,"Emotional":0.5,"Conservative":0.5}},
+            {"text": "C. 去往教练席感谢教练信任","scores":{"Systematic":0.5,"Gentle":1}},
+            {"text": "D. 靠近球迷区调动气氛", "scores":{"Individual":0.5,"Systematic":0.5,"Emotional":1}}
+        ]
+    },
+
+    {    
+                    
+        "id": 33,
+        "text": "33.平局的时候，你获得了一个半单刀机会，但在禁区角附近，后卫即将追上，没有时间思考，你会",
+        "options":[
+            {"text": "A. 管他这的那的，来一脚，造个角也行","scores":{"Individual":1,"Power":0.5}},
+            {"text": "B. 扣一下后在强行内切","scores":{"Gentle":0.5,"Emotional":0.5,"Aggressive":1}},
+            {"text": "C. 变化节奏，试图与后卫接触后倒地寻求点球","scores":{"Emotional":0.5,"Power":0,"Tech":0.5}},
+            {"text": "D. 往里塞一脚，没人接不是我的锅", "scores":{"Systematic":0.5,"Conservative":0.5}}
+        ]
+    },
+
+    {   
+        "id": 34,
+        "text": "34.80分钟球队一球领先，中场的你体力有点跟不上了，此时队友带球冲刺有一个反击机会，你会",
+        "options":[
+            {"text": "A. 燃尽自己，绝不放弃任何一个进球机会","scores":{"Individual":0.5,"Emotional":0.5,"Aggressive":1}},
+            {"text": "B. 继续上前，准备接应","scores":{"Systematic":1,"Aggressive":0.5}},
+            {"text": "C. 缓慢移动，只做球权梳理", "scores":{"Systematic":0.5,"Conservative":0.5}},
+            {"text": "D. 指挥队友上前，你来兜底擦屁股", "scores":{"Systematic":0.5,"Conservative":1}}
+        ]
+    },
+
+    {
+        "id": 35,
+        "text": "35. 教练突然让你踢一个完全不熟悉的位置（比如前锋去踢边后卫），你的反应是",
+        "options":[
+            {"text": "A. 表示不解，据理力争", "scores":{"Individual":1,"Emotional":1,"Aggressive":0.5}},
+            {"text": "B. 消极应对，蒙混过关", "scores":{"Emotional":0.5,"Conservative":0.5}},
+            {"text": "C. 尝试改变，适应要求", "scores":{"Systematic":1,"Gentle":0.5,"Power":1}},
+        ]
+    },
+            
+    {
+        "id": 36,
+        "text": "36. 禁区外一对一（非最后一人）正面防守对面的明星前锋，你会",
+        "options":[
+            {"text": "A. 且防且退，保持防守阵型的完整性, 等待队友协防","scores":{"Systematic":1,"Conservative":0.5}},
+            {"text": "B. 物理阻断是最高效率，犯规也不能让他突进去","scores":{"Emotional":0.5,"Power":1,"Aggressive":1}},
+            {"text": "C. 积极卡位，贴身逼迫，灵活预判寻求断球的机会","scores":{"Power":1,"Aggressive":0.5}},
+        ]
+    },
+            
+    {
+        "id": 37,
+        "text": "37. 远赴客场，此时你准备发角球，对方球迷对你和球队发出了极其不和谐的声音，甚至丢来杂物，你会",
+        "options":[
+            {"text": "A. 做闭嘴手势立刻回击", "scores":{"Individual":0.5,"Emotional":1}},
+            {"text": "B. 就近向裁判投诉", "scores":{"Emotional":0.5,"Aggressive":0.5}},
+            {"text": "C. 试图冷静下来争取罚好这球", "scores":{"Systematic":0.5,"Conservative":0.5}},
+        ]
+    },
+
+    {
+        "id": 38,
+        "text": "38. 在自家主场，数万球迷对你发出了漫天嘘声，你更可能会:",
+        "options":[
+            {"text": "A. 压力剧增，动作变形", "scores":{"Gentle":0.5,"Conservative":1}},
+            {"text": "B. 置若罔闻，无所吊谓", "scores":{"Individual":0.5,"Conservative":0.5}},
+            {"text": "C. 鞭策自己，多拼一分", "scores":{"Systematic":0.5,"Gentle":0.5,"Aggressive":0.5}},
+            {"text": "D. 表示不解，闷闷不乐", "scores":{"Emotional":0.5,"Aggressive":0.5}},
+        ]
+    },
+    
+    {
+        "id": 39,
+        "text": "39. 你连续没法上场，你感到确实是被主教练冷置替补了，但是球队战绩可观，即将到来的转会期经纪人建议你转投其他队伍，你会",
+        "options":[
+            {"text": "A. 向主教练索取时间", "scores":{"Individual":0.5,"Emotional":0.5,"Aggressive":1}},
+            {"text": "B. 听取经纪人建议马上跑路", "scores":{"Individual":1,"Emotional":0.5,}},
+            {"text": "C. 向球队其他队员寻求建议和帮助", "scores":{"Systematic":1,"Emotional":0.5,"Conservative":0.5}},
+            {"text": "D. 继续替补等待机会", "scores":{"Systematic":0.5,"Conservative":1}},
+        ]
+    },
+
+    {  
+        "id": 40,
+        "text": "40. 自由训练时间，能力均衡的你更想锻炼自己的哪一方面：",
+        "options":[
+            {"text": "A. 技术", "scores":{"Individual":0.5,"Tech":1,"Aggressive":0.5}},
+            {"text": "B. 体能", "scores":{"Emotional":0.5,"Conservative":0.5}},
+            {"text": "C. 战术跑位", "scores":{"Systematic":1,"Aggressive":0.5}},
+            {"text": "D. 身体对抗", "scores":{"Emotional":0.5,"Power":1}},
+        ]
+    },
+
+    {
+        "id": 41,
+        "text": "41. 弧顶开阔地单刀直面门将，门将选择弃门出击，队友准备后点插上，你的选择是",
+        "options":[
+            {"text": "A. 直接推努角", "scores":{"Individual":0.5,"Aggressive":1}},
+            {"text": "B. 先假动作晃过门将再说", "scores":{"Tech":1,"Aggressive":0.5}},
+            {"text": "C. 挑射门将", "scores":{"Emotional":0.5,"Tech":1,"Aggressive":0.5}},
+            {"text": "D. 选择传球（队友也是50%机会）", "scores":{"Systematic":0.5,"Emotional":0.5,"Conservative":0.5}},
+        ]
+    },
+
+    {
+        "id": 42,
+        "text": "42. 经纪人为你准备了一些可以参加的商业活动，你会选择",
+        "options":[
+            {"text": "A. 联名运动品牌进行新产品发布", "scores":{"Individual":1,"Conservative":0.5}},
+            {"text": "B. 球队赞助商公益合作", "scores":{"Systematic":0.5,"Gentle":1}},
+            {"text": "C. 参加国际著名时装周", "scores":{"Individual":1,"Emotional":0.5}},
+            {"text": "D. 参与宣传片拍摄", "scores":{"Individual":1,"Gentle":0.5}},
+        ]
+    },
+            
+    {    
+        "id": 43,
+        "text": "43. 球队想为你制作一张个人海报，你会选择",
+        "options":[
+            {"text": "A. 庆祝时刻", "scores":{"Individual":1,"Emotional":0.5}},
+            {"text": "B. 带球瞬间", "scores":{"Individual":0.5,"Aggressive":1}},
+            {"text": "C. 休闲定妆", "scores":{"Individual":0.5,"Conservative":0.5}},
+            {"text": "D. 个人获奖时刻", "scores":{"Individual":1,"Emotional":0.5}},
+        ]
+    },
+ 
+    {
+        "id": 44,
+        "text":"44. 球队踢客场有点沉闷，你会",
+        "options":[
+            {"text": "A. 主动带头鼓动全队气氛","scores":{"Emotional":0.5,"Aggressive":1}},
+            {"text": "B. 用自己的跑动影响其他人","scores":{"Systematic":0.5,"Aggressive":0.5}},
+            {"text": "C. 提醒教练组做一定改变","scores":{"Individual":0.5,"Systematic":0.5,"Aggressive":0.5}},
+            {"text": "D. 冷静等待时机","scores":{"Gentle":0.5,"Conservative":0.5}},
+        ]
+    },
+            
+    {
+        "id": 45,
+        "text": "45. 在对方半场面对逼抢时你会更相信",
+        "options":[
+            {"text": "A. 身体卡位护球", "scores":{"Power":1,"Aggressive":0.5}},
+            {"text": "B. 技术控球", "scores":{"Tech":1,"Aggressive":0.5}},
+            {"text": "C. 直接暴力过人", "scores":{"Individual":0.5,"Power":1,"Aggressive":1}},
+            {"text": "D. 寻找传球选择", "scores":{"Systematic":0.5,"Tech":0.5,"Conservative":0.5}},
+        ]
+    },
+
+    {
+        "id": 46,
+        "text": "46. 下列你更喜欢哪种进球方式",
+        "options":[
+            {"text": "A. 千里走单骑", "scores":{"Individual":1,"Aggressive":1}},
+            {"text": "B. 超远吊门", "scores":{"Individual":1,"Tech":1,"Aggressive":0.5}},
+            {"text": "C. 写意凌空斩", "scores":{"Individual":0.5,"Power":1,"Aggressive":0.5}},
+            {"text": "D. 内切世界波", "scores":{"Individual":0.5,"Power":0.5,"Aggressive":0.5}},
+        ]
+    },
+
+ 
+];
+
+let answers = [];
+let current = 0;
+let selectedOption = null;
+;
+
+
+function showQuestion() {
+
+    const q = questions[current];
+
+    // 显示题目
+    document.getElementById("question").innerText = q.text;
+
+    // 获取选项容器
+    const optionsDiv = document.getElementById("options");
+
+    // ❗每次先清空（非常重要）
+    optionsDiv.innerHTML = "";
+
+    // 👇👇👇 就放在这里 👇👇👇
+    q.options.forEach(option => {
+        const div = document.createElement("div");
+
+        div.className = "option";
+        div.innerText = option.text;
+
+        div.onclick = () => {
+
+            document.querySelectorAll(".option").forEach(el => {
+                el.classList.remove("selected");
+            });
+
+            div.classList.add("selected");
+
+            selectedOption = option;
+        };
+
+        optionsDiv.appendChild(div);
+    });
+
+}
+
+// =======================
+// 计分 + 人格判定核心逻辑
+// =======================
+
+function calculateResult() {
+
+    let score = {
+        I: 0, S: 0, A: 0, C: 0,
+        E: 0, G: 0, T: 0, P: 0
+    };
+
+    const map = {
+        Individual: "I",
+        Systematic: "S",
+        Aggressive: "A",
+        Conservative: "C",
+        Emotional: "E",
+        Gentle: "G",
+        Tech: "T",
+        Power: "P"
+    };
+
+    answers.forEach(ans => {
+        if (!ans || !ans.score) return;
+
+        for (let key in ans.score) {
+            const mappedKey = map[key];
+            if (mappedKey) {
+                score[mappedKey] += ans.score[key];
+            }
+        }
+    });
+
+    let type =
+        (score.I >= score.S ? "I" : "S") +
+        (score.A >= score.C ? "A" : "C") +
+        (score.E >= score.G ? "E" : "G") +
+        (score.T >= score.P ? "T" : "P");
+
+    let totalDiff =
+        Math.abs(score.I - score.S) +
+        Math.abs(score.A - score.C) +
+        Math.abs(score.E - score.G) +
+        Math.abs(score.T - score.P);
+
+    let level = totalDiff >= 10 ? "strong" : "weak";
+
+    return { type, level, score };
+}
+
+// ③ 下一题按钮
+document.getElementById("nextBtn").onclick = function () {
+
+    if (!selectedOption) {
+        alert("请选择一个选项！");
+        return;
+    }
+
+    // 保存答案
+    answers.push({
+        score: selectedOption.scores
+    });
+
+    selectedOption = null;
+
+    current++;
+
+    if (current < questions.length) {
+        showQuestion();
+    } else {
+
+        document.querySelector(".container").style.display = "none";
+        document.getElementById("loading").style.display = "block";
+
+        const result = calculateResult();
+
+        localStorage.setItem("result", JSON.stringify(result));
+
+        setTimeout(() => {
+            window.location.href = "result.html.html";
+        }, 2000);
+    }
+};
+
+
+// ❗④ 最关键：启动
+showQuestion();
+
+</script>
+
+</body>
+</html>
